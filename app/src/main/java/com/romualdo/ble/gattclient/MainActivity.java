@@ -28,8 +28,7 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity  implements
         SelectTimeFragment.OnFragmentInteractionListener,
-        SelectDateFragment.OnFragmentInteractionListener,
-        AlarmManager.OnAlarmListener {
+        SelectDateFragment.OnFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
