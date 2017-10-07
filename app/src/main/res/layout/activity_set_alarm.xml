@@ -14,13 +14,15 @@
             android:id="@+id/btnSetTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set time"/>
+            android:text="Set time"
+            android:onClick="showTimePickerDialog"/>
 
         <Button
             android:id="@+id/btnSetDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set date"/>
+            android:text="Set date"
+            android:onClick="showDatePickerDialog"/>
     </LinearLayout>
 
 </LinearLayout>
