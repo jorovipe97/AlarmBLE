@@ -1,5 +1,7 @@
 package com.romualdo.ble.gattclient;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -26,11 +28,13 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity  implements
         SelectTimeFragment.OnFragmentInteractionListener,
-        SelectDateFragment.OnFragmentInteractionListener {
+        SelectDateFragment.OnFragmentInteractionListener,
+        AlarmManager.OnAlarmListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String EXTRA_INPUTVAL = "com.romualdo.ble.blink.extra_inputval";
+    public static final String EXTRA_IS_FROM_ALARM = "com.romualdo.ble.blink.isFromAlarm";
 
     public static final String MAC_ADDRESS = "CA:A5:4F:3A:A9:5C";
     public static final UUID UUID_SERVICE = UUID.fromString("0000fe84-0000-1000-8000-00805f9b34fb");
@@ -65,6 +69,7 @@ public class MainActivity extends AppCompatActivity  implements
     public static final UUID UUID_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     public static final int REQUEST_ENABLE_BT = 1;
+    public static final int REQUEST_SET_ALARM = 2;
 
     private Context mContext;
     public static BluetoothManager mBluetoothManager;
@@ -81,6 +86,9 @@ public class MainActivity extends AppCompatActivity  implements
 
     private static final String PREFERENCES_NAME = "MyPrefsFile";
     private SharedPreferences sharedPreferences;
+
+    private AlarmManager alarmManager;
+    private static boolean isAlarmFired = false;
 
     private boolean ledStatus = false;
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -227,7 +235,22 @@ public class MainActivity extends AppCompatActivity  implements
         // TODO: Implement persistence in variable status: isAlarmSetted
         sharedPreferences = getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE);
 
+        alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
+
         startClient();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Intent intent = getIntent();
+        boolean val = intent.getBooleanExtra(EXTRA_IS_FROM_ALARM, false);
+
+        if (val) {
+            Toast.makeText(this, "Called from alarm HDP", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
@@ -250,11 +273,15 @@ public class MainActivity extends AppCompatActivity  implements
             }
             else {
                 // Si no se pudo conectar
-                connectBtn.setVisibility(View.INVISIBLE);
-                disconectBtn.setVisibility(View.INVISIBLE);
+                connectBtn.setVisibility(View.VISIBLE);
+                disconectBtn.setVisibility(View.VISIBLE);
+                connectBtn.setEnabled(false);
+                disconectBtn.setEnabled(false);
                 Toast.makeText(this, "Bluetooth not enabled, closing app...", Toast.LENGTH_SHORT).show();
                 // TODO: Close the app if bluetooth not enabled by user
             }
+        } else if (requestCode == REQUEST_SET_ALARM) {
+            Toast.makeText(this, "Hijueputa la alarma se llamo", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -329,6 +356,12 @@ public class MainActivity extends AppCompatActivity  implements
 
     public void setAlarm(View view) {
         Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(EXTRA_IS_FROM_ALARM, true);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, REQUEST_SET_ALARM, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*10, pendingIntent);
     }
 
     public void showTimePickerDialog(View view) {
