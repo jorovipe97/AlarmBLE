@@ -300,6 +300,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    public void openSetAlarmActivity(View view) {
+        Intent intent = new Intent(this, SetAlarmActivity.class);
+        startActivity(intent);
+    }
 
 }

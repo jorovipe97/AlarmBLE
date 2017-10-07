@@ -57,7 +57,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="On/Off Led"
-            android:textSize="42sp"/>
+            android:textSize="18sp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Set Alarm"
+            android:onClick="openSetAlarmActivity"/>
 
     </LinearLayout>
 
