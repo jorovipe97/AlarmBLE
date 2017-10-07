@@ -17,9 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connect"
-            android:onClick="startClient"
-            tools:layout_editor_absoluteY="231dp"
-            tools:layout_editor_absoluteX="76dp" />
+            android:onClick="startClient"/>
 
         <Button
             android:id="@+id/buttonDisconnect"
@@ -27,9 +25,7 @@
             android:layout_height="wrap_content"
             android:text="Disconnect"
             android:onClick="disconnect"
-            android:enabled="false"
-            tools:layout_editor_absoluteY="231dp"
-            tools:layout_editor_absoluteX="200dp" />
+            android:enabled="false"/>
 
     </LinearLayout>
 
