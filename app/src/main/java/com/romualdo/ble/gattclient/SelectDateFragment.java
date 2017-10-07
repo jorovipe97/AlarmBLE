@@ -3,7 +3,6 @@ package com.romualdo.ble.gattclient;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -13,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.TextView;
+
+import java.util.Calendar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -66,23 +67,9 @@ public class SelectDateFragment extends DialogFragment implements DatePickerDial
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the current date as the default date in the picker
+
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
@@ -94,10 +81,14 @@ public class SelectDateFragment extends DialogFragment implements DatePickerDial
 
 
     public void onDateSet(DatePicker view, int year, int month, int day) {
-
+        if (mListener != null) {
+            Calendar date = Calendar.getInstance();
+            date.set(year, month, day);
+            mListener.onPickerDateSet(date);
+        }
     }
 
-    /*
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -107,7 +98,7 @@ public class SelectDateFragment extends DialogFragment implements DatePickerDial
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
-    }*/
+    }
 
     @Override
     public void onDetach() {
@@ -126,7 +117,6 @@ public class SelectDateFragment extends DialogFragment implements DatePickerDial
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onPickerDateSet(Calendar date);
     }
 }

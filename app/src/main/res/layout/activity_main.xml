@@ -32,6 +32,46 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnSetTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set time"
+            android:onClick="showTimePickerDialog"/>
+
+        <Button
+            android:id="@+id/btnSetDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set date"
+            android:onClick="showDatePickerDialog"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="La fecha de la alarma"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/textClock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="00:00"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -51,18 +91,19 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnOnOff"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="On/Off Led"
-            android:textSize="18sp"/>
-
-        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:text="Set Alarm"
-            android:onClick="openSetAlarmActivity"/>
+            android:onClick="setAlarm"/>
+
+        <Button
+            android:id="@+id/btnOff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Off Alarm"
+            android:textSize="18sp"
+            android:enabled="false"/>
 
     </LinearLayout>
 

@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,13 +21,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.romualdo.ble.common.Ints;
-
-import org.w3c.dom.Text;
-
 import java.util.UUID;
+import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  implements
+        SelectTimeFragment.OnFragmentInteractionListener,
+        SelectDateFragment.OnFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -66,13 +67,21 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_ENABLE_BT = 1;
 
     private Context mContext;
-    private BluetoothManager mBluetoothManager;
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothGatt mBluetoothGatt;
+    public static BluetoothManager mBluetoothManager;
+    public static BluetoothAdapter mBluetoothAdapter;
+    public static BluetoothGatt mBluetoothGatt;
     private Button connectBtn;
     private Button disconectBtn;
     private TextView statusBtn;
-    private Button btnOnOff;
+    private Button btnOff;
+
+    private TextView textClock;
+    private TextView textDate;
+    private Calendar alarmOnDate;
+
+    private static final String PREFERENCES_NAME = "MyPrefsFile";
+    private SharedPreferences sharedPreferences;
+
     private boolean ledStatus = false;
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 
@@ -133,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                btnOnOff.setEnabled(true);
+                                btnOff.setEnabled(true);
                             }
                         });
                     }
@@ -184,14 +193,18 @@ public class MainActivity extends AppCompatActivity {
         connectBtn = (Button) findViewById(R.id.buttonConnect);
         disconectBtn = (Button) findViewById(R.id.buttonDisconnect);
         statusBtn = (TextView) findViewById(R.id.btnStatus);
-        btnOnOff = (Button) findViewById(R.id.btnOnOff);
-        btnOnOff.setOnClickListener(new View.OnClickListener() {
+        btnOff = (Button) findViewById(R.id.btnOff);
+
+        textClock = (TextView) findViewById(R.id.textClock);
+        textDate = (TextView) findViewById(R.id.textDate);
+
+        btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                turnOnOffLed();
+                turnOffAlarm();
             }
         });
-        btnOnOff.setEnabled(false);
+        btnOff.setEnabled(false);
 
         // When the app is opened not show buttons
         connectBtn.setVisibility(View.INVISIBLE);
@@ -210,6 +223,11 @@ public class MainActivity extends AppCompatActivity {
             connectBtn.setVisibility(View.VISIBLE);
             disconectBtn.setVisibility(View.VISIBLE);
         }
+
+        // TODO: Implement persistence in variable status: isAlarmSetted
+        sharedPreferences = getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE);
+
+        startClient();
     }
 
     @Override
@@ -240,7 +258,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void turnOnOffLed() {
+    // TODO: Reimplement this method functionality for only turn off the alarm.
+    private void turnOffAlarm() {
         ledStatus = !ledStatus;
         BluetoothGattCharacteristic ledCharacteristic = mBluetoothGatt
                 .getService(UUID_SERVICE)
@@ -261,8 +280,7 @@ public class MainActivity extends AppCompatActivity {
         mBluetoothGatt.writeCharacteristic(ledCharacteristic);
     }
 
-    // This is called when event onClick is fired
-    public void startClient(View view) {
+    public void startClient() {
         try {
             BluetoothDevice bluetoothDevice = mBluetoothAdapter.getRemoteDevice(MAC_ADDRESS);
             mBluetoothGatt = bluetoothDevice.connectGatt(this, false, mGattCallback);
@@ -277,7 +295,11 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e) {
             Log.w(TAG, e.toString());
         }
+    }
 
+    // This is called when event onClick is fired
+    public void startClient(View view) {
+        startClient();
     }
 
     // Called when onClik event of disconect button is fired
@@ -303,6 +325,44 @@ public class MainActivity extends AppCompatActivity {
     public void openSetAlarmActivity(View view) {
         Intent intent = new Intent(this, SetAlarmActivity.class);
         startActivity(intent);
+    }
+
+    public void setAlarm(View view) {
+        Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
+    }
+
+    public void showTimePickerDialog(View view) {
+        DialogFragment fragment = new SelectTimeFragment();
+        fragment.show(getSupportFragmentManager(), "TimePicker");
+    }
+
+    public void showDatePickerDialog(View view) {
+        DialogFragment fragment = new SelectDateFragment();
+        fragment.show(getSupportFragmentManager(), "DatePicker");
+    }
+
+
+    public void onPickerTimeSet(int hour, int minuts) {
+        String strhour = hour+"";
+        String strminute = minuts+"";
+
+        if (hour < 9) {
+            strhour = "0" + hour;
+        }
+        if (minuts < 9) {
+            strminute = "0" + minuts;
+        }
+
+        textClock.setText("");
+        /*Date time = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("H:m");*/
+        textClock.setText(strhour + ":" + strminute);
+    }
+
+    public void onPickerDateSet(Calendar c) {
+
+        textDate.setText(c.get(Calendar.DAY_OF_MONTH) + "/" + (c.get(Calendar.MONTH)+1) + "/" + c.get(Calendar.YEAR));
+
     }
 
 }

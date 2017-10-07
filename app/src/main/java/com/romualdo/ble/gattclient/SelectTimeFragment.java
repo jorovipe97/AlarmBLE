@@ -4,7 +4,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.icu.text.DateFormat;
-import android.icu.util.Calendar;
+import java.util.Calendar;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,14 +51,14 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
      * @return A new instance of fragment SelectTimeFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SelectTimeFragment newInstance(String param1, String param2) {
+    /*public static SelectTimeFragment newInstance(String param1, String param2) {
         SelectTimeFragment fragment = new SelectTimeFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
-    }
+    }*/
 
 
     @Override
@@ -65,13 +66,6 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstance) {
@@ -83,19 +77,15 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
     }
 
     // Called when user set a time
+    @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
-
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            Toast.makeText(getActivity(), "Time seted", Toast.LENGTH_LONG).show();
+            mListener.onPickerTimeSet(hourOfDay, minuteOfDay);
         }
     }
 
-    // This method causes app stoping
-    /*
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -105,7 +95,7 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
-    }*/
+    }
 
     @Override
     public void onDetach() {
@@ -124,7 +114,6 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onPickerTimeSet(int hour, int minuts);
     }
 }
