@@ -14,6 +14,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Locale;
 import java.util.UUID;
 import java.util.Calendar;
 
@@ -83,11 +86,21 @@ public class MainActivity extends AppCompatActivity  implements
     private TextView textDate;
     private Calendar alarmOnDate;
 
+    private TextView timeCalendar;
+    private TextView timeSystem;
+    private Button btnSetAlarm;
+
     private static final String PREFERENCES_NAME = "MyPrefsFile";
     private SharedPreferences sharedPreferences;
 
     private AlarmManager alarmManager;
+
     private static boolean isAlarmFired = false;
+
+    private boolean isAlarmSetted = false;
+    private boolean canSetAlarm = false;
+    private boolean isTimeSeted = false;
+    private boolean isDateSeted = false;
 
     private boolean ledStatus = false;
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -146,6 +159,18 @@ public class MainActivity extends AppCompatActivity  implements
 
                     BluetoothGattCharacteristic characteristicLed = service.getCharacteristic(UUID_CHARACTERISTIC_LED);
                     if (characteristicLed != null) {
+
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (isAlarmFired) {
+                                    writeLedCharacteristic(true);
+                                }
+                            }
+                        };
+                        Handler mainHandler = new Handler(Looper.getMainLooper());
+                        mainHandler.postDelayed(myRunnable, 1000);
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -201,6 +226,10 @@ public class MainActivity extends AppCompatActivity  implements
         disconectBtn = (Button) findViewById(R.id.buttonDisconnect);
         statusBtn = (TextView) findViewById(R.id.btnStatus);
         btnOff = (Button) findViewById(R.id.btnOff);
+        timeCalendar = (TextView) findViewById(R.id.currenTime1);
+        timeSystem = (TextView) findViewById(R.id.currenTime2);
+
+        btnSetAlarm = (Button) findViewById(R.id.btnSetAlarm);
 
         textClock = (TextView) findViewById(R.id.textClock);
         textDate = (TextView) findViewById(R.id.textDate);
@@ -208,7 +237,8 @@ public class MainActivity extends AppCompatActivity  implements
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                turnOffAlarm();
+                //turnOnOffAlarm();
+                writeLedCharacteristic(false);
             }
         });
         btnOff.setEnabled(false);
@@ -236,6 +266,10 @@ public class MainActivity extends AppCompatActivity  implements
 
         alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
 
+        alarmOnDate = Calendar.getInstance(Locale.getDefault());
+
+
+
         startClient();
     }
 
@@ -243,11 +277,18 @@ public class MainActivity extends AppCompatActivity  implements
     protected void onResume() {
         super.onResume();
 
+        mBluetoothGatt.discoverServices();
+
         Intent intent = getIntent();
         boolean val = intent.getBooleanExtra(EXTRA_IS_FROM_ALARM, false);
+        isAlarmFired = val;
 
         if (val) {
             Toast.makeText(this, "Called from alarm HDP", Toast.LENGTH_LONG).show();
+            // Si minimizo y vuelvo a abrir la app, no se vuelve a ejecuutar este codigo
+            // gracias a la siguiente linea
+            intent.putExtra(EXTRA_IS_FROM_ALARM, false);
+
         }
 
     }
@@ -285,7 +326,7 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     // TODO: Reimplement this method functionality for only turn off the alarm.
-    private void turnOffAlarm() {
+    private void turnOnOffAlarm() {
         ledStatus = !ledStatus;
         BluetoothGattCharacteristic ledCharacteristic = mBluetoothGatt
                 .getService(UUID_SERVICE)
@@ -304,6 +345,33 @@ public class MainActivity extends AppCompatActivity  implements
         }
         ledCharacteristic.setValue(val);
         mBluetoothGatt.writeCharacteristic(ledCharacteristic);
+    }
+
+    private boolean writeLedCharacteristic(boolean data) {
+        BluetoothGattService ledService = mBluetoothGatt.getService(UUID_SERVICE);
+        if (ledService == null) {
+            Toast.makeText(this, "Could not Get led service", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        BluetoothGattCharacteristic ledCharacteristic = ledService.getCharacteristic(UUID_CHARACTERISTIC_LED);
+        if (ledCharacteristic == null) {
+            Toast.makeText(this, "Could not Get led characteristic", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        byte[] val = new byte[1];
+
+        if (data) {
+            val[0] = (byte) 1;
+            //Log.i(TAG, "Led status ON");
+        } else {
+            val[0] = (byte) 0;
+        }
+
+        ledCharacteristic.setValue(val);
+        mBluetoothGatt.writeCharacteristic(ledCharacteristic);
+        Toast.makeText(this, "Written in led service, val = " + val[0], Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     public void startClient() {
@@ -359,8 +427,14 @@ public class MainActivity extends AppCompatActivity  implements
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(EXTRA_IS_FROM_ALARM, true);
 
+
+        timeCalendar.setText(((alarmOnDate.getTimeInMillis()-System.currentTimeMillis())/1000)+"");
+        timeSystem.setText(System.currentTimeMillis()+"");
+
         PendingIntent pendingIntent = PendingIntent.getActivity(this, REQUEST_SET_ALARM, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*10, pendingIntent);
+        //alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*10, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmOnDate.getTimeInMillis(), pendingIntent);
+
     }
 
     public void showTimePickerDialog(View view) {
@@ -375,6 +449,14 @@ public class MainActivity extends AppCompatActivity  implements
 
 
     public void onPickerTimeSet(int hour, int minuts) {
+        isTimeSeted = true;
+        if (isDateSeted && isTimeSeted) {
+            canSetAlarm = true;
+        }
+
+        btnSetAlarm.setEnabled(canSetAlarm);
+
+
         String strhour = hour+"";
         String strminute = minuts+"";
 
@@ -385,6 +467,8 @@ public class MainActivity extends AppCompatActivity  implements
             strminute = "0" + minuts;
         }
 
+        alarmOnDate.set(Calendar.HOUR_OF_DAY, hour);
+        alarmOnDate.set(Calendar.MINUTE, minuts);
         textClock.setText("");
         /*Date time = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("H:m");*/
@@ -392,9 +476,14 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     public void onPickerDateSet(Calendar c) {
+        isDateSeted = true;
+        if (isDateSeted && isTimeSeted) {
+            canSetAlarm = true;
+        }
+        btnSetAlarm.setEnabled(canSetAlarm);
 
-        textDate.setText(c.get(Calendar.DAY_OF_MONTH) + "/" + (c.get(Calendar.MONTH)+1) + "/" + c.get(Calendar.YEAR));
-
+        alarmOnDate.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE));
+        textDate.setText(c.get(Calendar.DATE) + "/" + (c.get(Calendar.MONTH)+1) + "/" + c.get(Calendar.YEAR));
     }
 
 }

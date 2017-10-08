@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.romualdo.ble.gattclient.MainActivity">
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,11 +91,13 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/btnSetAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:text="Set Alarm"
-            android:onClick="setAlarm"/>
+            android:onClick="setAlarm"
+            android:enabled="false"/>
 
         <Button
             android:id="@+id/btnOff"
@@ -104,6 +106,25 @@
             android:text="Off Alarm"
             android:textSize="18sp"
             android:enabled="false"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/currenTime1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TimeCalendar"/>
+
+        <TextView
+            android:id="@+id/currenTime2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TmeSystem"/>
 
     </LinearLayout>
 
