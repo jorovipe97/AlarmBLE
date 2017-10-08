@@ -239,12 +239,13 @@ public class MainActivity extends AppCompatActivity  implements
 
         btnOff.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                //turnOnOffAlarm();
+            public void onClick(View v) {
                 writeLedCharacteristic(false);
                 btnOff.setEnabled(false);
+                WakeLocker.release();
             }
         });
+
         btnOff.setEnabled(false);
 
         // When the app is opened not show buttons
@@ -293,7 +294,6 @@ public class MainActivity extends AppCompatActivity  implements
             // Si minimizo y vuelvo a abrir la app, no se vuelve a ejecuutar este codigo
             // gracias a la siguiente linea
             intent.putExtra(EXTRA_IS_FROM_ALARM, false);
-            WakeLocker.release();
 
         }
 
