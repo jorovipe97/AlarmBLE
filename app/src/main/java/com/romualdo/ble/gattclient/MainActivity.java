@@ -25,6 +25,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.romualdo.ble.common.WakeLocker;
+
 import java.util.Locale;
 import java.util.UUID;
 import java.util.Calendar;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity  implements
         SelectTimeFragment.OnFragmentInteractionListener,
         SelectDateFragment.OnFragmentInteractionListener {
 
+    public static final String APP_TAG = "com.romualdo.alarmble";
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String EXTRA_INPUTVAL = "com.romualdo.ble.blink.extra_inputval";
@@ -222,6 +225,8 @@ public class MainActivity extends AppCompatActivity  implements
         mContext = this;
         setContentView(R.layout.activity_main);
 
+        //WakeLocker.acquire(this);
+
         connectBtn = (Button) findViewById(R.id.buttonConnect);
         disconectBtn = (Button) findViewById(R.id.buttonDisconnect);
         statusBtn = (TextView) findViewById(R.id.btnStatus);
@@ -288,6 +293,7 @@ public class MainActivity extends AppCompatActivity  implements
             // Si minimizo y vuelvo a abrir la app, no se vuelve a ejecuutar este codigo
             // gracias a la siguiente linea
             intent.putExtra(EXTRA_IS_FROM_ALARM, false);
+            WakeLocker.release();
 
         }
 
@@ -425,8 +431,8 @@ public class MainActivity extends AppCompatActivity  implements
         Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
         btnSetAlarm.setEnabled(false);
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_IS_FROM_ALARM, true);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        //intent.putExtra(EXTRA_IS_FROM_ALARM, true);
 
         // If users has not specified the date of the alarm, app will use today date.
         if (!isDateSeted) {
@@ -434,7 +440,7 @@ public class MainActivity extends AppCompatActivity  implements
             alarmOnDate.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE));
         }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, REQUEST_SET_ALARM, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_SET_ALARM, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         //alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*10, pendingIntent);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarmOnDate.getTimeInMillis(), pendingIntent);
 
