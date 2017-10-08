@@ -5,11 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:gravity="center"
     tools:context="com.romualdo.ble.gattclient.MainActivity">
 
     <LinearLayout
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/h6"
         android:orientation="horizontal">
 
         <Button
@@ -30,47 +33,89 @@
 
     </LinearLayout>
 
+    <View
+        android:layout_width="80dp"
+        android:layout_height="10dp"
+        android:background="@color/clouds" />
+
     <LinearLayout
+        android:gravity="center"
+        android:paddingTop="@dimen/h6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/btnSetTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set time"
-            android:onClick="showTimePickerDialog"/>
 
         <Button
             android:id="@+id/btnSetDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set date"
+            android:text="Fecha alarma"
+            android:textSize="@dimen/text_default"
             android:onClick="showDatePickerDialog"/>
+
+        <Button
+            android:id="@+id/btnSetTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hora alarma"
+            android:textSize="@dimen/h3"
+            android:onClick="showTimePickerDialog"/>
+
+
     </LinearLayout>
 
+
     <LinearLayout
+        android:gravity="center"
+        android:paddingTop="22sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/h6"
+            android:text="La alarma sonará el"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:gravity="center"
+        android:paddingTop="5sp"
+        android:paddingBottom="15sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/textDate"
+            android:textAlignment="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="La fecha de la alarma"
-            android:textSize="18sp"/>
+            android:text="year/mo/da"
+            android:textSize="@dimen/h5"/>
+
+        <TextView
+            android:textAlignment="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="a las"
+            android:paddingLeft="@dimen/h6"
+            android:paddingRight="@dimen/h6"
+            android:textSize="@dimen/h6"/>
 
         <TextView
             android:id="@+id/textClock"
+            android:textAlignment="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="00:00"
-            android:textSize="18sp"/>
+            android:text="hh:mm"
+            android:textSize="@dimen/h5"/>
 
     </LinearLayout>
 
     <LinearLayout
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -78,14 +123,16 @@
 
         <TextView
             android:id="@+id/btnStatus"
+            android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Button up"
-            android:textSize="50sp" />
+            android:textSize="@dimen/text_small" />
 
     </LinearLayout>
 
     <LinearLayout
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -114,17 +161,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/currenTime1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TimeCalendar"/>
 
-        <TextView
-            android:id="@+id/currenTime2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TmeSystem"/>
 
     </LinearLayout>
 

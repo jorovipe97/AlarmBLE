@@ -86,8 +86,6 @@ public class MainActivity extends AppCompatActivity  implements
     private TextView textDate;
     private Calendar alarmOnDate;
 
-    private TextView timeCalendar;
-    private TextView timeSystem;
     private Button btnSetAlarm;
 
     private static final String PREFERENCES_NAME = "MyPrefsFile";
@@ -97,7 +95,6 @@ public class MainActivity extends AppCompatActivity  implements
 
     private static boolean isAlarmFired = false;
 
-    private boolean isAlarmSetted = false;
     private boolean canSetAlarm = false;
     private boolean isTimeSeted = false;
     private boolean isDateSeted = false;
@@ -174,7 +171,9 @@ public class MainActivity extends AppCompatActivity  implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                btnOff.setEnabled(true);
+                                if (isAlarmFired) {
+                                    btnOff.setEnabled(true);
+                                }
                             }
                         });
                     }
@@ -201,6 +200,7 @@ public class MainActivity extends AppCompatActivity  implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            btnOff.setEnabled(false);
                             statusBtn.setText("Button Down");
                         }
                     });
@@ -226,8 +226,6 @@ public class MainActivity extends AppCompatActivity  implements
         disconectBtn = (Button) findViewById(R.id.buttonDisconnect);
         statusBtn = (TextView) findViewById(R.id.btnStatus);
         btnOff = (Button) findViewById(R.id.btnOff);
-        timeCalendar = (TextView) findViewById(R.id.currenTime1);
-        timeSystem = (TextView) findViewById(R.id.currenTime2);
 
         btnSetAlarm = (Button) findViewById(R.id.btnSetAlarm);
 
@@ -239,6 +237,7 @@ public class MainActivity extends AppCompatActivity  implements
             public void onClick(View view) {
                 //turnOnOffAlarm();
                 writeLedCharacteristic(false);
+                btnOff.setEnabled(false);
             }
         });
         btnOff.setEnabled(false);
@@ -268,6 +267,7 @@ public class MainActivity extends AppCompatActivity  implements
 
         alarmOnDate = Calendar.getInstance(Locale.getDefault());
 
+        textDate.setText(alarmOnDate.get(Calendar.DATE) + "/" + (alarmOnDate.get(Calendar.MONTH)+1) + "/" + alarmOnDate.get(Calendar.YEAR));
 
 
         startClient();
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity  implements
         isAlarmFired = val;
 
         if (val) {
-            Toast.makeText(this, "Called from alarm HDP", Toast.LENGTH_LONG).show();
+            // Toast.makeText(this, "Called from alarm HDP", Toast.LENGTH_LONG).show();
             // Si minimizo y vuelvo a abrir la app, no se vuelve a ejecuutar este codigo
             // gracias a la siguiente linea
             intent.putExtra(EXTRA_IS_FROM_ALARM, false);
@@ -318,14 +318,12 @@ public class MainActivity extends AppCompatActivity  implements
                 connectBtn.setEnabled(false);
                 disconectBtn.setEnabled(false);
                 Toast.makeText(this, "Bluetooth not enabled, closing app...", Toast.LENGTH_SHORT).show();
-                // TODO: Close the app if bluetooth not enabled by user
+                // TODO: Catch exceptions if bluetooth is not available on device.
             }
-        } else if (requestCode == REQUEST_SET_ALARM) {
-            Toast.makeText(this, "Hijueputa la alarma se llamo", Toast.LENGTH_LONG).show();
         }
     }
 
-    // TODO: Reimplement this method functionality for only turn off the alarm.
+
     private void turnOnOffAlarm() {
         ledStatus = !ledStatus;
         BluetoothGattCharacteristic ledCharacteristic = mBluetoothGatt
@@ -370,7 +368,7 @@ public class MainActivity extends AppCompatActivity  implements
 
         ledCharacteristic.setValue(val);
         mBluetoothGatt.writeCharacteristic(ledCharacteristic);
-        Toast.makeText(this, "Written in led service, val = " + val[0], Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Written in led service, val = " + val[0], Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -378,7 +376,10 @@ public class MainActivity extends AppCompatActivity  implements
         try {
             BluetoothDevice bluetoothDevice = mBluetoothAdapter.getRemoteDevice(MAC_ADDRESS);
             mBluetoothGatt = bluetoothDevice.connectGatt(this, false, mGattCallback);
-            Toast.makeText(this, "Connected to " + MAC_ADDRESS, Toast.LENGTH_SHORT).show();
+            /*
+            if (!isAlarmFired) {
+                Toast.makeText(this, "Connected to " + MAC_ADDRESS, Toast.LENGTH_SHORT).show();
+            }*/
 
             if (mBluetoothGatt == null) {
                 Log.w(TAG, "Unable to create GATT client");
@@ -404,7 +405,6 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     // Called when onDestroy event is fired
-    // TODO: Call this in onDestroy event of current Activity
     public void stopClient() {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.close();
@@ -423,13 +423,16 @@ public class MainActivity extends AppCompatActivity  implements
 
     public void setAlarm(View view) {
         Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
+        btnSetAlarm.setEnabled(false);
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(EXTRA_IS_FROM_ALARM, true);
 
-
-        timeCalendar.setText(((alarmOnDate.getTimeInMillis()-System.currentTimeMillis())/1000)+"");
-        timeSystem.setText(System.currentTimeMillis()+"");
+        // If users has not specified the date of the alarm, app will use today date.
+        if (!isDateSeted) {
+            Calendar c = Calendar.getInstance(Locale.getDefault());
+            alarmOnDate.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE));
+        }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, REQUEST_SET_ALARM, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         //alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*10, pendingIntent);
@@ -450,7 +453,7 @@ public class MainActivity extends AppCompatActivity  implements
 
     public void onPickerTimeSet(int hour, int minuts) {
         isTimeSeted = true;
-        if (isDateSeted && isTimeSeted) {
+        if (isTimeSeted) {
             canSetAlarm = true;
         }
 
@@ -476,8 +479,9 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     public void onPickerDateSet(Calendar c) {
+        // The date is optional, in case when user doesnt specify one, today date is used.
         isDateSeted = true;
-        if (isDateSeted && isTimeSeted) {
+        if (isTimeSeted) {
             canSetAlarm = true;
         }
         btnSetAlarm.setEnabled(canSetAlarm);
