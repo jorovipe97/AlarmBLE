@@ -200,6 +200,17 @@ public class MainActivity extends AppCompatActivity  implements
                 //int state = Ints.fromByteArray(data);
                 Log.i(TAG, data[0] + "");
                 if (data[0] == 1) {
+
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            WakeLocker.release();
+                        }
+                    };
+
+                    Handler mainHandler = new Handler(Looper.getMainLooper());
+                    mainHandler.postDelayed(r, 2000);
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -428,7 +439,7 @@ public class MainActivity extends AppCompatActivity  implements
     }
 
     public void setAlarm(View view) {
-        Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Setting alarm", Toast.LENGTH_SHORT).show();
         btnSetAlarm.setEnabled(false);
 
         Intent intent = new Intent(this, AlarmReceiver.class);

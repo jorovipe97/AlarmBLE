@@ -80,7 +80,7 @@ public class SelectTimeFragment extends DialogFragment implements TimePickerDial
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
         if (mListener != null) {
-            Toast.makeText(getActivity(), "Time seted", Toast.LENGTH_LONG).show();
+            // Toast.makeText(getActivity(), "Time seted", Toast.LENGTH_LONG).show();
             mListener.onPickerTimeSet(hourOfDay, minuteOfDay);
         }
     }
